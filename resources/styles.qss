@@ -1,0 +1,383 @@
+/* YouTube Downloader - Premium Soft Theme */
+
+/* Main Window - Soft dark gray */
+QMainWindow {
+    background: #181818;
+}
+
+/* Base Widget */
+QWidget {
+    background-color: transparent;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 9pt;
+}
+
+/* Group Box - Subtle depth */
+QGroupBox {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(40, 40, 45, 0.6),
+                                stop:1 rgba(35, 35, 40, 0.8));
+    border: 1px solid rgba(60, 60, 65, 0.4);
+    border-radius: 8px;
+    margin-top: 10px;
+    padding: 14px 10px 10px 10px;
+    font-weight: 500;
+    font-size: 9pt;
+    color: #a0a0a0;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 10px;
+    padding: 3px 10px;
+    background: rgba(50, 50, 55, 0.5);
+    border: 1px solid rgba(70, 70, 75, 0.3);
+    border-radius: 4px;
+    color: #b0b0b0;
+}
+
+/* Line Edit - Soft with subtle glow on focus */
+QLineEdit {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #252528,
+                                stop:1 #20202a);
+    border: 1px solid rgba(70, 70, 80, 0.5);
+    border-radius: 6px;
+    padding: 7px 12px;
+    color: #e0e0e0;
+    selection-background-color: #2d5f8d;
+}
+
+QLineEdit:hover {
+    border: 1px solid rgba(90, 90, 100, 0.7);
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #2a2a2d,
+                                stop:1 #25252f);
+}
+
+QLineEdit:focus {
+    border: 1px solid rgba(70, 130, 180, 0.6);
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #2d2d30,
+                                stop:1 #28283a);
+}
+
+QLineEdit:read-only {
+    background: #1f1f22;
+    color: #909090;
+    border: 1px solid rgba(60, 60, 70, 0.4);
+}
+
+/* Combo Box - Soft premium look */
+QComboBox {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #2a2a2d,
+                                stop:1 #25252a);
+    border: 1px solid rgba(70, 70, 80, 0.5);
+    border-radius: 6px;
+    padding: 7px 12px;
+    color: #e0e0e0;
+    min-height: 20px;
+}
+
+QComboBox:hover {
+    border: 1px solid rgba(90, 90, 100, 0.7);
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #2f2f32,
+                                stop:1 #2a2a2f);
+}
+
+QComboBox:focus {
+    border: 1px solid rgba(70, 130, 180, 0.6);
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 24px;
+}
+
+QComboBox::down-arrow {
+    image: none;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #a0a0a0;
+    margin-right: 10px;
+}
+
+QComboBox QAbstractItemView {
+    background: #252528;
+    border: 1px solid rgba(70, 130, 180, 0.5);
+    border-radius: 6px;
+    selection-background-color: #2d5f8d;
+    selection-color: white;
+    outline: none;
+    padding: 4px;
+}
+
+/* Primary Button - Soft gradient with depth */
+QPushButton {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #4a90c8,
+                                stop:0.5 #3a7fb8,
+                                stop:1 #2d6fa8);
+    border: 1px solid rgba(80, 140, 190, 0.3);
+    border-radius: 7px;
+    padding: 9px 18px;
+    color: white;
+    font-weight: 600;
+    font-size: 9pt;
+}
+
+QPushButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #5aa0d8,
+                                stop:0.5 #4a90c8,
+                                stop:1 #3a80b8);
+}
+
+QPushButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #2d6fa8,
+                                stop:0.5 #2565a0,
+                                stop:1 #1d5590);
+    padding: 10px 18px 8px 18px;
+}
+
+QPushButton:disabled {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #3a3a3d,
+                                stop:1 #303033);
+    color: #666;
+    border: 1px solid rgba(60, 60, 65, 0.3);
+}
+
+/* Secondary Button - Softer, less prominent */
+QPushButton[class="secondary"] {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #35353a,
+                                stop:1 #2d2d32);
+    border: 1px solid rgba(70, 70, 80, 0.4);
+    color: #c0c0c0;
+}
+
+QPushButton[class="secondary"]:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #40404a,
+                                stop:1 #38383f);
+    border: 1px solid rgba(80, 80, 90, 0.5);
+    color: #e0e0e0;
+}
+
+QPushButton[class="secondary"]:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #2a2a2f,
+                                stop:1 #25252a);
+}
+
+/* Small Button */
+QPushButton[class="small"] {
+    padding: 5px 14px;
+    font-size: 8pt;
+}
+
+/* Progress Bar - Soft and elegant */
+QProgressBar {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #22222a,
+                                stop:1 #1d1d25);
+    border: 1px solid rgba(60, 60, 70, 0.4);
+    border-radius: 4px;
+    text-align: center;
+    color: #d0d0d0;
+    font-weight: 500;
+    height: 18px;
+}
+
+QProgressBar::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #50a0e0,
+                                stop:0.5 #4090d0,
+                                stop:1 #3080c0);
+    border-radius: 3px;
+}
+
+/* List Widget - Soft cards */
+QListWidget {
+    background: #1e1e22;
+    border: 1px solid rgba(60, 60, 70, 0.4);
+    border-radius: 6px;
+    padding: 6px;
+    outline: none;
+}
+
+QListWidget::item {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(40, 40, 45, 0.5),
+                                stop:1 rgba(35, 35, 40, 0.7));
+    border: 1px solid rgba(60, 60, 65, 0.3);
+    border-radius: 5px;
+    padding: 10px;
+    margin: 3px 0;
+    color: #e0e0e0;
+}
+
+QListWidget::item:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(50, 50, 55, 0.6),
+                                stop:1 rgba(45, 45, 50, 0.8));
+    border: 1px solid rgba(70, 70, 80, 0.4);
+}
+
+QListWidget::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(60, 110, 150, 0.4),
+                                stop:1 rgba(50, 100, 140, 0.5));
+    border: 1px solid rgba(70, 130, 180, 0.5);
+}
+
+/* Scrollbar - Subtle and elegant */
+QScrollBar:vertical {
+    background: rgba(30, 30, 35, 0.3);
+    width: 10px;
+    margin: 0;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgba(80, 80, 90, 0.5);
+    min-height: 25px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: rgba(100, 100, 110, 0.6);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* Label Variants */
+QLabel {
+    color: #e0e0e0;
+    background: transparent;
+}
+
+QLabel[class="title"] {
+    font-size: 16pt;
+    font-weight: 700;
+    color: #f5f5f5;
+}
+
+QLabel[class="subtitle"] {
+    font-size: 9pt;
+    color: #a0a0a0;
+}
+
+QLabel[class="info"] {
+    font-size: 8pt;
+    color: #909090;
+}
+
+QLabel[class="section"] {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #b0b0b0;
+}
+
+/* Tab Widget - Soft premium tabs */
+QTabWidget::pane {
+    border: 1px solid rgba(60, 60, 70, 0.4);
+    border-radius: 6px;
+    background: transparent;
+}
+
+QTabBar::tab {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(35, 35, 40, 0.5),
+                                stop:1 rgba(30, 30, 35, 0.7));
+    border: 1px solid rgba(50, 50, 60, 0.3);
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding: 9px 18px;
+    margin-right: 3px;
+    color: #909090;
+    font-size: 9pt;
+    font-weight: 500;
+}
+
+QTabBar::tab:selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(60, 110, 150, 0.3),
+                                stop:1 rgba(50, 100, 140, 0.4));
+    color: #e8e8e8;
+    border: 1px solid rgba(70, 130, 180, 0.4);
+    border-bottom: none;
+}
+
+QTabBar::tab:hover:!selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(45, 45, 50, 0.6),
+                                stop:1 rgba(40, 40, 45, 0.8));
+    color: #c0c0c0;
+}
+
+/* Menu Bar - Soft and integrated */
+QMenuBar {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #202025,
+                                stop:1 #1a1a1f);
+    border-bottom: 1px solid rgba(50, 50, 60, 0.5);
+    padding: 3px;
+}
+
+QMenuBar::item {
+    background: transparent;
+    padding: 6px 12px;
+    color: #d0d0d0;
+    border-radius: 4px;
+}
+
+QMenuBar::item:selected {
+    background: rgba(60, 60, 70, 0.4);
+    color: #f0f0f0;
+}
+
+QMenu {
+    background: #252528;
+    border: 1px solid rgba(70, 70, 80, 0.5);
+    border-radius: 6px;
+    padding: 6px;
+}
+
+QMenu::item {
+    padding: 8px 24px;
+    color: #e0e0e0;
+    border-radius: 4px;
+}
+
+QMenu::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(60, 110, 150, 0.4),
+                                stop:1 rgba(50, 100, 140, 0.5));
+    color: white;
+}
+
+/* Status Bar - Subtle integration */
+QStatusBar {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #1a1a1f,
+                                stop:1 #151518);
+    border-top: 1px solid rgba(50, 50, 60, 0.4);
+    color: #909090;
+    padding: 3px;
+}
