@@ -10,6 +10,12 @@ import platform
 class DownloadItemWidget(QWidget):
     """Custom widget for each download item with controls"""
     
+    FORMAT_ICONS = {
+        'MP3': '🎵',
+        'MP4': '🎬',
+        'WebM': '🎞️'
+    }
+    
     def __init__(self, title, format_type, quality, index, parent=None):
         super().__init__(parent)
         self.index = index
@@ -19,26 +25,38 @@ class DownloadItemWidget(QWidget):
     def init_ui(self, title, format_type, quality):
         """Initialize item UI"""
         layout = QVBoxLayout()
-        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(6)
         
-        # Top row: Title
-        title_layout = QHBoxLayout()
+        # Row 1: Title with elipsis
         self.title_label = QLabel(title)
-        self.title_label.setStyleSheet("font-weight: 600; color: #fff; font-size: 10pt;")
-        self.title_label.setWordWrap(True)
-        title_layout.addWidget(self.title_label)
-        layout.addLayout(title_layout)
+        self.title_label.setStyleSheet("""
+            font-weight: 600; 
+            color: #fff; 
+            font-size: 10pt;
+        """)
+        self.title_label.setWordWrap(False)
+        self.title_label.setToolTip(title)  # Show full title on hover
+        # Enable text elipsis
+        font_metrics = self.title_label.fontMetrics()
+        elided_text = font_metrics.elidedText(title, Qt.TextElideMode.ElideRight, 550)
+        self.title_label.setText(elided_text)
+        layout.addWidget(self.title_label)
         
-        # Bottom row: Info + Controls
-        bottom_layout = QHBoxLayout()
-        bottom_layout.setSpacing(8)
+        # Row 2: Format and Quality (with icon)
+        format_icon = self.FORMAT_ICONS.get(format_type, '📁')
+        self.format_quality_label = QLabel(f"{format_icon} {format_type} • {quality}")
+        self.format_quality_label.setStyleSheet("color: #aaa; font-size: 9pt;")
+        layout.addWidget(self.format_quality_label)
         
-        # Info text
-        self.info_label = QLabel(f"Format: {format_type} | Quality: {quality} | Status: Pending...")
-        self.info_label.setProperty("class", "info")
-        self.info_label.setStyleSheet("color: #999; font-size: 8pt;")
-        bottom_layout.addWidget(self.info_label, 1)
+        # Row 3: Status and Controls
+        status_layout = QHBoxLayout()
+        status_layout.setSpacing(8)
+        
+        # Status label
+        self.status_label = QLabel("⏺️ Pending")
+        self.status_label.setStyleSheet("color: #999; font-size: 9pt;")
+        status_layout.addWidget(self.status_label, 1)
         
         # Control buttons
         self.pause_btn = QPushButton("⏸")
@@ -63,11 +81,35 @@ class DownloadItemWidget(QWidget):
         self.cancel_btn.setEnabled(False)
         self.cancel_btn.setProperty("class", "small")
         
-        bottom_layout.addWidget(self.pause_btn)
-        bottom_layout.addWidget(self.resume_btn)
-        bottom_layout.addWidget(self.cancel_btn)
+        status_layout.addWidget(self.pause_btn)
+        status_layout.addWidget(self.resume_btn)
+        status_layout.addWidget(self.cancel_btn)
         
-        layout.addLayout(bottom_layout)
+        layout.addLayout(status_layout)
+        
+        # Row 4: Progress bar (hidden by default)
+        from PyQt6.QtWidgets import QProgressBar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setMaximum(100)
+        self.progress_bar.setTextVisible(True)
+        self.progress_bar.setVisible(False)
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid #3a3a3a;
+                border-radius: 3px;
+                text-align: center;
+                height: 18px;
+                background-color: #2a2a2a;
+                color: #fff;
+                font-size: 8pt;
+            }
+            QProgressBar::chunk {
+                background-color: #0e639c;
+                border-radius: 2px;
+            }
+        """)
+        layout.addWidget(self.progress_bar)
+        
         self.setLayout(layout)
         
         # Style the widget
@@ -75,9 +117,33 @@ class DownloadItemWidget(QWidget):
             DownloadItemWidget {
                 background: rgba(40, 40, 45, 0.5);
                 border: 1px solid rgba(60, 60, 65, 0.3);
-                border-radius: 5px;
+                border-radius: 6px;
             }
         """)
+    
+    def update_progress(self, progress_info):
+        """Update progress bar"""
+        if progress_info.get('status') == 'downloading':
+            self.progress_bar.setVisible(True)
+            # Extract percentage from string like "45.2%"
+            percent_str = progress_info.get('percent', '0%').replace('%', '')
+            try:
+                percent = float(percent_str)
+                self.progress_bar.setValue(int(percent))
+                
+                # Update progress text with speed and size info
+                downloaded = progress_info.get('downloaded', '')
+                total = progress_info.get('total', '')
+                speed = progress_info.get('speed', '')
+                
+                if downloaded and total:
+                    self.progress_bar.setFormat(f"{downloaded}/{total} • {speed}")
+                else:
+                    self.progress_bar.setFormat(f"{percent:.1f}%")
+            except:
+                pass
+        else:
+            self.progress_bar.setVisible(False)
     
     def enable_controls(self):
         """Enable pause and cancel buttons when download starts"""
@@ -93,12 +159,35 @@ class DownloadItemWidget(QWidget):
         self.cancel_btn.setEnabled(False)
     
     def update_status(self, status_text):
-        """Update info label"""
-        parts = self.info_label.text().split('|')
-        if len(parts) >= 2:
-            self.info_label.setText(f"{parts[0]}| {parts[1]}| Status: {status_text}")
+        """Update status label"""
+        # Add appropriate icon based on status
+        if 'Completed' in status_text or '✅' in status_text:
+            icon = '✅'
+            status_text = status_text.replace('✅', '').strip()
+            self.status_label.setText(f"{icon} {status_text}")
+            self.status_label.setStyleSheet("color: #4caf50; font-size: 9pt; font-weight: 600;")
+            self.progress_bar.setVisible(False)
+        elif 'Error' in status_text or '❌' in status_text:
+            icon = '❌'
+            status_text = status_text.replace('❌', '').strip()
+            self.status_label.setText(f"{icon} {status_text}")
+            self.status_label.setStyleSheet("color: #f44336; font-size: 9pt; font-weight: 600;")
+            self.progress_bar.setVisible(False)
+        elif 'Downloading' in status_text:
+            icon = '⏳'
+            self.status_label.setText(f"{icon} {status_text}")
+            self.status_label.setStyleSheet("color: #2196f3; font-size: 9pt; font-weight: 600;")
+        elif 'Paused' in status_text:
+            icon = '⏸️'
+            self.status_label.setText(f"{icon} {status_text}")
+            self.status_label.setStyleSheet("color: #ff9800; font-size: 9pt; font-weight: 600;")
+        elif 'Pending' in status_text:
+            icon = '⏺️'
+            self.status_label.setText(f"{icon} {status_text}")
+            self.status_label.setStyleSheet("color: #999; font-size: 9pt;")
         else:
-            self.info_label.setText(status_text)
+            self.status_label.setText(status_text)
+            self.status_label.setStyleSheet("color: #999; font-size: 9pt;")
     
     def on_pause(self):
         """Handle pause button click"""
@@ -125,9 +214,11 @@ class DownloadItemWidget(QWidget):
 class QueueWidget(QWidget):
     """Download queue and history widget"""
     
-    def __init__(self):
+    def __init__(self, config=None):
         super().__init__()
+        self.config = config
         self.downloads = []
+        self.active_downloads_count = 0
         self.init_ui()
     
     def init_ui(self):
@@ -179,14 +270,25 @@ class QueueWidget(QWidget):
         layout.addStretch()
         self.setLayout(layout)
     
-    def start_download(self, index, config):
+    def start_download(self, index, config=None):
         """Start a download task for a specific item"""
+        if config is None:
+            config = self.config
+        
+        if not config:
+            print("Error: No config available")
+            return
+            
         if 0 <= index < len(self.downloads):
             item_data = self.downloads[index]
             
             if item_data['status'] == 'downloading' and 'worker' in item_data:
                 return
 
+            # Update status to downloading
+            item_data['status'] = 'downloading'
+            self.active_downloads_count += 1
+            
             # Create worker
             thread = QThread(self)
             worker = DownloadWorker(
@@ -204,6 +306,7 @@ class QueueWidget(QWidget):
             # Connect signals
             worker.finished.connect(lambda msg, path, idx=index: self.on_queue_download_finished(idx, msg, path))
             worker.error.connect(lambda err, idx=index: self.on_queue_download_error(idx, err))
+            worker.progress.connect(lambda progress, idx=index: self.on_queue_download_progress(idx, progress))
             
             thread.started.connect(worker.run)
             worker.finished.connect(thread.quit)
@@ -218,6 +321,7 @@ class QueueWidget(QWidget):
                     widget.update_status("Downloading...")
             
             thread.start()
+            self.update_stats()
 
     def pause_download(self, index):
         """Pause a download"""
@@ -257,22 +361,34 @@ class QueueWidget(QWidget):
 
     def on_queue_download_finished(self, index, message, path):
         """Handle finished download for queue item"""
+        self.active_downloads_count = max(0, self.active_downloads_count - 1)
         self.update_download_status(index, 'completed', path)
+        # Process next item in queue
+        self.process_queue()
         
     def on_queue_download_error(self, index, error):
         """Handle error for queue item"""
+        self.active_downloads_count = max(0, self.active_downloads_count - 1)
         self.update_download_status(index, 'error')
         print(f"Error downloading item {index}: {error}")
+        # Process next item in queue
+        self.process_queue()
         
     def add_download(self, info):
         """Add a download to the queue"""
+        # Get title with playlist name if available
+        title = info['title']
+        if info.get('playlist_name'):
+            title = f"[{info['playlist_name']}] {info['title']}"
+        
         download_item = {
             'title': info['title'],
             'url': info['url'],
             'format': info['format'],
             'quality': info['quality'],
             'status': 'pending',
-            'path': None
+            'path': None,
+            'playlist_name': info.get('playlist_name')
         }
         
         self.downloads.append(download_item)
@@ -285,7 +401,7 @@ class QueueWidget(QWidget):
         
         # Create custom widget for this item
         item_widget = DownloadItemWidget(
-            info['title'],
+            title,
             info['format'],
             info['quality'],
             current_index,
@@ -296,6 +412,10 @@ class QueueWidget(QWidget):
         self.queue_list.setItemWidget(item, item_widget)
         
         self.update_stats()
+        
+        # Auto-start if enabled and we have config
+        if self.config and self.config.get('auto_start_queue', True):
+            self.process_queue()
         
     def on_item_double_clicked(self, item):
         """Handle double click on item"""
@@ -331,13 +451,30 @@ class QueueWidget(QWidget):
             
             self.update_stats()
     
+    def process_queue(self):
+        """Process pending downloads up to max concurrent limit"""
+        if not self.config:
+            return
+        
+        max_concurrent = self.config.get('max_simultaneous_downloads', 3)
+        
+        # Find pending downloads and start them if we have capacity
+        for i, download in enumerate(self.downloads):
+            if download['status'] == 'pending' and self.active_downloads_count < max_concurrent:
+                self.start_download(i)
+    
     def update_stats(self):
         """Update statistics"""
         total = len(self.downloads)
-        active = sum(1 for d in self.downloads if d['status'] == 'downloading')
+        active = self.active_downloads_count
         completed = sum(1 for d in self.downloads if d['status'] == 'completed')
+        pending = sum(1 for d in self.downloads if d['status'] == 'pending')
         
-        self.stats_label.setText(f"Total: {total} | Active: {active} | Completed: {completed}")
+        stats_text = f"Total: {total} | Active: {active} | Completed: {completed}"
+        if pending > 0:
+            stats_text += f" | Pending: {pending}"
+        
+        self.stats_label.setText(stats_text)
     
     def clear_completed(self):
         """Clear completed downloads from the list"""

@@ -277,6 +277,7 @@ class DownloadWidget(QWidget):
         
         if self.video_info.get('type') == 'playlist':
             count = 0
+            playlist_name = self.video_info.get('title', 'Playlist')
             for entry in self.video_info['entries']:
                 if entry:
                     url = entry.get('url') or entry.get('original_url')
@@ -289,7 +290,8 @@ class DownloadWidget(QWidget):
                             'url': url,
                             'format': format_type,
                             'quality': quality,
-                            'is_playlist_item': True
+                            'is_playlist_item': True,
+                            'playlist_name': playlist_name
                         })
                         count += 1
             

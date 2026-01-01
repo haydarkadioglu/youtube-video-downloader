@@ -38,8 +38,8 @@ class MainWindow(QMainWindow):
         self.download_widget = DownloadWidget(self.config)
         self.tabs.addTab(self.download_widget, "📥 Download")
         
-        # Queue widget
-        self.queue_widget = QueueWidget()
+        # Queue widget with config for auto-queue management
+        self.queue_widget = QueueWidget(self.config)
         self.tabs.addTab(self.queue_widget, "📋 Queue")
         
         # Connect download started signal to queue
@@ -103,11 +103,4 @@ class MainWindow(QMainWindow):
     def on_download_started(self, download_info):
         """Handle download started"""
         self.queue_widget.add_download(download_info)
-        
-        # If it's a playlist item, we need to ensure it starts downloading automatically
-        # since the DownloadWidget only handles the single interactive download visually.
-        # So we tell the queue widget to handle the actual downloading for playlist items.
-        if download_info.get('is_playlist_item'):
-             self.queue_widget.start_download(len(self.queue_widget.downloads) - 1, self.config)
-             
         self.status_bar.showMessage(f"Download started: {download_info['title']}")
