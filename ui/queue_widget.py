@@ -28,19 +28,16 @@ class DownloadItemWidget(QWidget):
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(6)
         
-        # Row 1: Title with elipsis
+        # Row 1: Title (responsive with word wrap)
         self.title_label = QLabel(title)
         self.title_label.setStyleSheet("""
             font-weight: 600; 
             color: #fff; 
             font-size: 10pt;
         """)
-        self.title_label.setWordWrap(False)
+        self.title_label.setWordWrap(True)  # Word wrap for long titles
+        self.title_label.setMaximumHeight(42)  # Max 2 lines
         self.title_label.setToolTip(title)  # Show full title on hover
-        # Enable text elipsis
-        font_metrics = self.title_label.fontMetrics()
-        elided_text = font_metrics.elidedText(title, Qt.TextElideMode.ElideRight, 550)
-        self.title_label.setText(elided_text)
         layout.addWidget(self.title_label)
         
         # Row 2: Format and Quality (with icon)
@@ -373,6 +370,15 @@ class QueueWidget(QWidget):
         print(f"Error downloading item {index}: {error}")
         # Process next item in queue
         self.process_queue()
+    
+    def on_queue_download_progress(self, index, progress_info):
+        """Handle progress updates for queue item"""
+        if 0 <= index < len(self.downloads):
+            item = self.queue_list.item(index)
+            if item:
+                widget = self.queue_list.itemWidget(item)
+                if widget:
+                    widget.update_progress(progress_info)
         
     def add_download(self, info):
         """Add a download to the queue"""
