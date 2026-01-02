@@ -20,6 +20,7 @@ class DownloadItemWidget(QWidget):
         super().__init__(parent)
         self.index = index
         self.parent_queue = parent
+        self.current_progress = 0  # Track progress percentage
         self.init_ui(title, format_type, quality)
     
     def init_ui(self, title, format_type, quality):
@@ -28,34 +29,61 @@ class DownloadItemWidget(QWidget):
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(6)
         
-        # Row 1: Title (responsive with word wrap)
+        # Row 1: Title (single line, expanding)
         self.title_label = QLabel(title)
         self.title_label.setStyleSheet("""
-            font-weight: 600; 
-            color: #fff; 
-            font-size: 10pt;
+            QLabel {
+                font-weight: 600; 
+                color: #fff; 
+                font-size: 10pt;
+            }
         """)
-        self.title_label.setWordWrap(True)  # Word wrap for long titles
-        self.title_label.setMaximumHeight(42)  # Max 2 lines
-        self.title_label.setToolTip(title)  # Show full title on hover
+        from PyQt6.QtWidgets import QSizePolicy
+        self.title_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self.title_label.setWordWrap(False)  # Single line
+        self.title_label.setToolTip(title)  # Full title on hover
         layout.addWidget(self.title_label)
         
-        # Row 2: Format and Quality (with icon)
+        # Row 2: Format and Quality
         format_icon = self.FORMAT_ICONS.get(format_type, '📁')
         self.format_quality_label = QLabel(f"{format_icon} {format_type} • {quality}")
         self.format_quality_label.setStyleSheet("color: #aaa; font-size: 9pt;")
         layout.addWidget(self.format_quality_label)
         
-        # Row 3: Status and Controls
-        status_layout = QHBoxLayout()
-        status_layout.setSpacing(8)
-        
-        # Status label
+        # Row 3: Status with percentage
         self.status_label = QLabel("⏺️ Pending")
         self.status_label.setStyleSheet("color: #999; font-size: 9pt;")
-        status_layout.addWidget(self.status_label, 1)
+        self.status_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        layout.addWidget(self.status_label)
         
-        # Control buttons
+        # Row 4: Progress bar (always visible)
+        from PyQt6.QtWidgets import QProgressBar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setMaximum(100)
+        self.progress_bar.setValue(0)  # Start at 0%
+        self.progress_bar.setTextVisible(True)
+        self.progress_bar.setFormat("Ready")
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid #3a3a3a;
+                border-radius: 3px;
+                text-align: center;
+                height: 20px;
+                background-color: #2a2a2a;
+                color: #bbb;
+                font-size: 8pt;
+            }
+            QProgressBar::chunk {
+                background-color: #0e639c;
+                border-radius: 2px;
+            }
+        """)
+        layout.addWidget(self.progress_bar)
+        
+        # Row 5: Control buttons
+        controls_layout = QHBoxLayout()
+        controls_layout.addStretch()
+        
         self.pause_btn = QPushButton("⏸")
         self.pause_btn.setFixedSize(28, 24)
         self.pause_btn.setToolTip("Pause")
@@ -78,34 +106,11 @@ class DownloadItemWidget(QWidget):
         self.cancel_btn.setEnabled(False)
         self.cancel_btn.setProperty("class", "small")
         
-        status_layout.addWidget(self.pause_btn)
-        status_layout.addWidget(self.resume_btn)
-        status_layout.addWidget(self.cancel_btn)
+        controls_layout.addWidget(self.pause_btn)
+        controls_layout.addWidget(self.resume_btn)
+        controls_layout.addWidget(self.cancel_btn)
         
-        layout.addLayout(status_layout)
-        
-        # Row 4: Progress bar (hidden by default)
-        from PyQt6.QtWidgets import QProgressBar
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setMaximum(100)
-        self.progress_bar.setTextVisible(True)
-        self.progress_bar.setVisible(False)
-        self.progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 1px solid #3a3a3a;
-                border-radius: 3px;
-                text-align: center;
-                height: 18px;
-                background-color: #2a2a2a;
-                color: #fff;
-                font-size: 8pt;
-            }
-            QProgressBar::chunk {
-                background-color: #0e639c;
-                border-radius: 2px;
-            }
-        """)
-        layout.addWidget(self.progress_bar)
+        layout.addLayout(controls_layout)
         
         self.setLayout(layout)
         
@@ -119,28 +124,32 @@ class DownloadItemWidget(QWidget):
         """)
     
     def update_progress(self, progress_info):
-        """Update progress bar"""
+        """Update progress bar and status"""
         if progress_info.get('status') == 'downloading':
-            self.progress_bar.setVisible(True)
-            # Extract percentage from string like "45.2%"
+            # Extract percentage
             percent_str = progress_info.get('percent', '0%').replace('%', '')
             try:
                 percent = float(percent_str)
-                self.progress_bar.setValue(int(percent))
+                self.current_progress = int(percent)
+                self.progress_bar.setValue(self.current_progress)
                 
-                # Update progress text with speed and size info
+                # Update status label with percentage
+                self.status_label.setText(f"⏳ Downloading... {self.current_progress}%")
+                
+                # Update progress bar format with speed and size
                 downloaded = progress_info.get('downloaded', '')
                 total = progress_info.get('total', '')
                 speed = progress_info.get('speed', '')
                 
-                if downloaded and total:
+                if downloaded and total and speed:
                     self.progress_bar.setFormat(f"{downloaded}/{total} • {speed}")
                 else:
                     self.progress_bar.setFormat(f"{percent:.1f}%")
             except:
                 pass
-        else:
-            self.progress_bar.setVisible(False)
+        elif progress_info.get('status') == 'processing':
+            self.progress_bar.setValue(100)
+            self.progress_bar.setFormat("Processing...")
     
     def enable_controls(self):
         """Enable pause and cancel buttons when download starts"""
@@ -156,32 +165,38 @@ class DownloadItemWidget(QWidget):
         self.cancel_btn.setEnabled(False)
     
     def update_status(self, status_text):
-        """Update status label"""
+        """Update status label and progress bar"""
         # Add appropriate icon based on status
         if 'Completed' in status_text or '✅' in status_text:
             icon = '✅'
             status_text = status_text.replace('✅', '').strip()
             self.status_label.setText(f"{icon} {status_text}")
             self.status_label.setStyleSheet("color: #4caf50; font-size: 9pt; font-weight: 600;")
-            self.progress_bar.setVisible(False)
+            self.progress_bar.setValue(100)
+            self.progress_bar.setFormat("Completed")
         elif 'Error' in status_text or '❌' in status_text:
             icon = '❌'
             status_text = status_text.replace('❌', '').strip()
             self.status_label.setText(f"{icon} {status_text}")
             self.status_label.setStyleSheet("color: #f44336; font-size: 9pt; font-weight: 600;")
-            self.progress_bar.setVisible(False)
+            self.progress_bar.setValue(0)
+            self.progress_bar.setFormat("Error")
         elif 'Downloading' in status_text:
             icon = '⏳'
             self.status_label.setText(f"{icon} {status_text}")
             self.status_label.setStyleSheet("color: #2196f3; font-size: 9pt; font-weight: 600;")
+            # Progress bar updated via update_progress
         elif 'Paused' in status_text:
             icon = '⏸️'
             self.status_label.setText(f"{icon} {status_text}")
             self.status_label.setStyleSheet("color: #ff9800; font-size: 9pt; font-weight: 600;")
+            self.progress_bar.setFormat("Paused")
         elif 'Pending' in status_text:
             icon = '⏺️'
             self.status_label.setText(f"{icon} {status_text}")
             self.status_label.setStyleSheet("color: #999; font-size: 9pt;")
+            self.progress_bar.setValue(0)
+            self.progress_bar.setFormat("Ready")
         else:
             self.status_label.setText(status_text)
             self.status_label.setStyleSheet("color: #999; font-size: 9pt;")
@@ -236,6 +251,7 @@ class QueueWidget(QWidget):
         
         # List widget
         self.queue_list = QListWidget()
+        self.queue_list.setMinimumHeight(400)  # Expand queue area
         self.queue_list.itemDoubleClicked.connect(self.on_item_double_clicked)
         queue_layout.addWidget(self.queue_list)
         
