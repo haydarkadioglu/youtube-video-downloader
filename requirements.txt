@@ -1,4 +1,4 @@
 PyQt6>=6.6.1
-yt-dlp>=2024.12.23
+yt-dlp>=2026.3.17
 Pillow>=10.4.0
 requests>=2.32.3

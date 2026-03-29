@@ -85,6 +85,7 @@ class DownloadWorker(QObject):
                 'progress_hooks': [self.progress_hook],
                 'quiet': True,
                 'no_warnings': True,
+                'extractor_args': {'youtube': ['player_client=default']},
             }
             
             # Format selection based on user choice
@@ -155,6 +156,7 @@ class VideoInfoExtractor(QObject):
                 'quiet': True,
                 'no_warnings': True,
                 'extract_flat': 'in_playlist',
+                'extractor_args': {'youtube': ['player_client=default']},
             }
             
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
