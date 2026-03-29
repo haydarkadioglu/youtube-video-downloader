@@ -35,6 +35,13 @@ def main():
     window = MainWindow(config)
     window.show()
     
+    # Close splash screen if running from PyInstaller bundle
+    try:
+        import pyi_splash
+        pyi_splash.close()
+    except ImportError:
+        pass
+    
     # Run application
     sys.exit(app.exec())
 

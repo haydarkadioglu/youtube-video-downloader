@@ -6,7 +6,7 @@ import sys
 import os
 
 APP_NAME = "YT Video Downloader"
-APP_VERSION = "v1.0.0"
+APP_VERSION = "v1.2.0"
 
 def build():
     """Build the executable using PyInstaller"""

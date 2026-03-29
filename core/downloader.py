@@ -79,12 +79,21 @@ class DownloadWorker(QObject):
             # Ensure output directory exists
             Path(self.output_path).mkdir(parents=True, exist_ok=True)
             
+            # Determine local ffmpeg path
+            import sys
+            import os
+            if getattr(sys, 'frozen', False):
+                ffmpeg_path = os.path.dirname(sys.executable)
+            else:
+                ffmpeg_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            
             # Configure yt-dlp options
             ydl_opts = {
                 'outtmpl': os.path.join(self.output_path, '%(title)s.%(ext)s'),
                 'progress_hooks': [self.progress_hook],
                 'quiet': True,
                 'no_warnings': True,
+                'ffmpeg_location': ffmpeg_path,
                 'extractor_args': {'youtube': ['player_client=default']},
             }
             
@@ -152,10 +161,19 @@ class VideoInfoExtractor(QObject):
     def run(self):
         """Extract video information"""
         try:
+            # Determine local ffmpeg path
+            import sys
+            import os
+            if getattr(sys, 'frozen', False):
+                ffmpeg_path = os.path.dirname(sys.executable)
+            else:
+                ffmpeg_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
             ydl_opts = {
                 'quiet': True,
                 'no_warnings': True,
                 'extract_flat': 'in_playlist',
+                'ffmpeg_location': ffmpeg_path,
                 'extractor_args': {'youtube': ['player_client=default']},
             }
             
