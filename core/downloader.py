@@ -80,12 +80,8 @@ class DownloadWorker(QObject):
             Path(self.output_path).mkdir(parents=True, exist_ok=True)
             
             # Determine local ffmpeg path
-            import sys
-            import os
-            if getattr(sys, 'frozen', False):
-                ffmpeg_path = os.path.dirname(sys.executable)
-            else:
-                ffmpeg_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            from core.ffmpeg_utils import get_ffmpeg_dir
+            ffmpeg_path = get_ffmpeg_dir()
             
             # Configure yt-dlp options
             ydl_opts = {
@@ -162,12 +158,8 @@ class VideoInfoExtractor(QObject):
         """Extract video information"""
         try:
             # Determine local ffmpeg path
-            import sys
-            import os
-            if getattr(sys, 'frozen', False):
-                ffmpeg_path = os.path.dirname(sys.executable)
-            else:
-                ffmpeg_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            from core.ffmpeg_utils import get_ffmpeg_dir
+            ffmpeg_path = get_ffmpeg_dir()
 
             ydl_opts = {
                 'quiet': True,
