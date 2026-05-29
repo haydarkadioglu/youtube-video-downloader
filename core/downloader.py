@@ -96,12 +96,15 @@ class DownloadWorker(QObject):
             # Format selection based on user choice
             if self.format_type.lower() == 'mp3':
                 ydl_opts.update({
-                    'format': 'bestaudio/best',
+                    'format': 'bestaudio[ext=m4a]/bestaudio/best',
                     'postprocessors': [{
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
                         'preferredquality': '320',
                     }],
+                    'postprocessor_args': {
+                        'ffmpeg': ['-acodec', 'libmp3lame', '-b:a', '320k'],
+                    },
                 })
             else:
                 # Video format selection
@@ -130,7 +133,10 @@ class DownloadWorker(QObject):
                     
                     # Get the final filename
                     if self.format_type.lower() == 'mp3':
-                        filename = ydl.prepare_filename(info).rsplit('.', 1)[0] + '.mp3'
+                        # Önce .m4a/.webm uzantısını al, sonra .mp3 yap
+                        filename = ydl.prepare_filename(info)
+                        if not filename.endswith('.mp3'):
+                            filename = filename.rsplit('.', 1)[0] + '.mp3'
                     else:
                         filename = ydl.prepare_filename(info)
                     
