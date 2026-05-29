@@ -79,9 +79,9 @@ class DownloadWorker(QObject):
             # Ensure output directory exists
             Path(self.output_path).mkdir(parents=True, exist_ok=True)
             
-            # Determine local ffmpeg path
-            from core.ffmpeg_utils import get_ffmpeg_dir
-            ffmpeg_path = get_ffmpeg_dir()
+            # Determine local ffmpeg path (cross-platform)
+            from core.ffmpeg_utils import get_ffmpeg_path, get_ffprobe_path
+            ffmpeg_path = get_ffmpeg_path()
             
             # Configure yt-dlp options
             ydl_opts = {
@@ -163,15 +163,14 @@ class VideoInfoExtractor(QObject):
     def run(self):
         """Extract video information"""
         try:
-            # Determine local ffmpeg path
-            from core.ffmpeg_utils import get_ffmpeg_dir
-            ffmpeg_path = get_ffmpeg_dir()
+            # Determine local ffmpeg path (cross-platform)
+            from core.ffmpeg_utils import get_ffmpeg_path
 
             ydl_opts = {
                 'quiet': True,
                 'no_warnings': True,
                 'extract_flat': 'in_playlist',
-                'ffmpeg_location': ffmpeg_path,
+                'ffmpeg_location': get_ffmpeg_path(),
                 'extractor_args': {'youtube': ['player_client=default']},
             }
             

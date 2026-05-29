@@ -24,18 +24,16 @@ class MainWindow(QMainWindow):
         QTimer.singleShot(500, self.check_ffmpeg)
     
     def check_ffmpeg(self):
-        """Check for and download FFmpeg if necessary"""
-        from core.ffmpeg_utils import get_ffmpeg_dir, FFmpegSetupWorker
-        from pathlib import Path
+        """Check for and download FFmpeg if necessary (Windows) or warn (Linux/macOS)"""
+        from core.ffmpeg_utils import is_ffmpeg_available, FFmpegSetupWorker
         
-        bin_dir = Path(get_ffmpeg_dir())
-        if (bin_dir / "ffmpeg.exe").exists() and (bin_dir / "ffprobe.exe").exists():
+        if is_ffmpeg_available():
             return
             
         self.progress_dialog = QProgressDialog("Video motoru ayarlanıyor, lütfen bekleyin...", "İptal", 0, 100, self)
         self.progress_dialog.setWindowTitle("İlk Kurulum")
         self.progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
-        self.progress_dialog.setCancelButton(None) # Disable cancel button
+        self.progress_dialog.setCancelButton(None)
         self.progress_dialog.setMinimumDuration(0)
         self.progress_dialog.setValue(0)
         self.progress_dialog.show()
@@ -50,7 +48,7 @@ class MainWindow(QMainWindow):
         """Handle FFmpeg setup completion"""
         self.progress_dialog.close()
         if not success:
-            QMessageBox.warning(self, "Kurulum Uyarı", f"FFmpeg yüklenemedi: {message}\nBazı indirme/dönüştürme özellikleri çalışmayabilir.")
+            QMessageBox.warning(self, "Kurulum Uyarı", f"FFmpeg bulunamadı:\n{message}\nBazı indirme/dönüştürme özellikleri çalışmayabilir.")
             
     def init_ui(self):
         """Initialize the user interface"""
