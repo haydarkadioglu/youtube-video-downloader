@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                              QListWidget, QListWidgetItem, QGroupBox, QPushButton,
-                             QFrame, QSizePolicy)
+                             QFrame, QSizePolicy, QMessageBox)
 from PyQt6.QtCore import Qt, QThread
 from core.downloader import DownloadWorker
+from core.database import DownloadDatabase
 import os
 import subprocess
 import platform
@@ -262,11 +263,26 @@ class QueueWidget(QWidget):
         self.clear_btn.clicked.connect(self.clear_completed)
         self.clear_btn.setProperty("class", "secondary")
         
+        self.clear_all_btn = QPushButton("🗑️ Clear All History")
+        self.clear_all_btn.clicked.connect(self.clear_all_history)
+        self.clear_all_btn.setProperty("class", "secondary")
+        self.clear_all_btn.setStyleSheet("""
+            QPushButton {
+                background: #5a1a1a;
+                color: #ff6b6b;
+                border: 1px solid #7a2a2a;
+            }
+            QPushButton:hover {
+                background: #7a2a2a;
+            }
+        """)
+        
         self.open_folder_btn = QPushButton("Open Downloads Folder")
         self.open_folder_btn.clicked.connect(self.open_downloads_folder)
         self.open_folder_btn.setProperty("class", "secondary")
         
         button_layout.addWidget(self.clear_btn)
+        button_layout.addWidget(self.clear_all_btn)
         button_layout.addWidget(self.open_folder_btn)
         button_layout.addStretch()
         
@@ -508,6 +524,39 @@ class QueueWidget(QWidget):
         
         self.downloads = [d for d in self.downloads if d['status'] != 'completed']
         self.update_stats()
+    
+    def clear_all_history(self):
+        """Clear ALL history (completed + error) from list and database"""
+        reply = QMessageBox.question(
+            self,
+            "Clear All History",
+            "Tüm indirme geçmişini temizlemek istediğinize emin misiniz?\n\n(Bu işlem geri alınamaz!)",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            # Clear from list widget
+            for i in range(self.queue_list.count() - 1, -1, -1):
+                item = self.queue_list.item(i)
+                index = item.data(Qt.ItemDataRole.UserRole)
+                if index < len(self.downloads) and self.downloads[index]['status'] in ('completed', 'error'):
+                    self.queue_list.takeItem(i)
+            
+            # Clear from memory
+            self.downloads = [d for d in self.downloads if d['status'] not in ('completed', 'error')]
+            
+            # Clear from database
+            try:
+                db = DownloadDatabase()
+                deleted = db.clear_all_history()
+                db.close()
+                if deleted > 0:
+                    print(f"Cleared {deleted} records from database")
+            except Exception as e:
+                print(f"Database clear error: {e}")
+            
+            self.update_stats()
     
     def open_downloads_folder(self):
         """Open the downloads folder in file explorer"""

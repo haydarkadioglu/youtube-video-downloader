@@ -136,6 +136,20 @@ class DownloadDatabase:
         cursor.execute('DELETE FROM downloads WHERE status = ?', ('completed',))
         self.connection.commit()
     
+    def clear_all_history(self):
+        """Remove ALL history entries (completed and error) from database"""
+        cursor = self.connection.cursor()
+        cursor.execute("DELETE FROM downloads WHERE status IN ('completed', 'error')")
+        self.connection.commit()
+        return cursor.rowcount  # Return how many rows were deleted
+    
+    def clear_all(self):
+        """Remove ALL entries from database (complete wipe)"""
+        cursor = self.connection.cursor()
+        cursor.execute('DELETE FROM downloads')
+        self.connection.commit()
+        return cursor.rowcount
+    
     def cleanup_old_history(self, days: int = 30):
         """Delete history older than specified days"""
         cursor = self.connection.cursor()

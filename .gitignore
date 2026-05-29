@@ -42,6 +42,11 @@ dist/
 *.db-journal
 *.log
 
+# Environment
+.env
+.env.local
+.env.*.local
+
 # Config (optional - uncomment if you don't want to track user configs)
 # .youtube_downloader/
 # config.json
